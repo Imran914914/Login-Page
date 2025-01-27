@@ -2,9 +2,94 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #161e32; /* Updated background color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+@media (max-width: 400px) {
+  .logo-placeholder img {
+      max-height: 60px;
+  }
+
+  textarea {
+      height: 80px;
+  }
+
+  button {
+      font-size: 14px;
+  }
+}
+
 .placeholder-wrap::placeholder {
   white-space: normal;
   word-wrap: break-word;
+  font-family: Arial, sans-serif;;
+}
+
+.login-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  box-sizing: border-box;
+  position: relative;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold; /* Make button text bold */
+  color: #1c243e; /* Updated button text color */
+  background-color: #22d1f8; /* Updated button color */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #1aa4c8; /* Darker shade for hover effect */
+}
+
+.message-container {
+  background-color: #dc3545;
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 10px;
+  /* display: none; */
+}
+
+
+.logo-placeholder {
+  margin-bottom: 20px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-placeholder img {
+  max-height: 80px;
+  width: auto;
+  max-width: 100%;
 }
 
 
