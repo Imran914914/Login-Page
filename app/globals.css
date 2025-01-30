@@ -2,15 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #161e32; /* Updated background color */
+  background-color: #161e32;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-}
+} */
 
 @media (max-width: 400px) {
   .logo-placeholder img {
@@ -37,8 +37,8 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
-  width: 100%;
-  max-width: 500px;
+  /* width: 100%;
+  max-width: 500px; */
   text-align: center;
   box-sizing: border-box;
   position: relative;
@@ -61,7 +61,7 @@ button:hover {
   background-color: #1aa4c8; /* Darker shade for hover effect */
 }
 
-.message-container {
+.message-container-error {
   background-color: #dc3545;
   position: absolute;
   top: -70px;
@@ -69,7 +69,23 @@ button:hover {
   transform: translateX(-50%);
   width: 100%;
   text-align: center;
-  padding: 10px;
+  padding: 5px;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 10px;
+  /* display: none; */
+}
+
+.message-container-success {
+  background-color: #28a745;
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+  padding: 5px;
   border-radius: 8px;
   font-size: 16px;
   color: #fff;
