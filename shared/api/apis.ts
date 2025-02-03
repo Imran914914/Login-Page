@@ -42,16 +42,16 @@ export const  getCryptoLog = async (cryptoLogId:any) => {
         });
 
         if(!cryptoLogId){
-            console.error("Error: Crypto Log ID is required");
+            console.log("Error: Crypto Log ID is required");
         }
     
         if (!response.ok) {
-          console.error(`Error: ${response.status} ${response.statusText}`);
+          console.log(`Error: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         return data;
       } catch (error) {
-        console.error("Error fetching crypto log:", error);
+        console.log("Error fetching crypto log:", error);
         return null;
       }
 }

