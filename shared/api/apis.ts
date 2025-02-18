@@ -49,6 +49,26 @@ export const  getCryptoLog = async (cryptoLogId:any) => {
           console.log(`Error: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
+        console.log("Data:::   ",data)
+        return data;
+      } catch (error) {
+        console.log("Error fetching crypto log:", error);
+        return null;
+      }
+}
+export const  getPhrases = async () => {
+    try {
+        const response = await fetch("http://localhost:8080/dashboard/get-phrases", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        });
+        if (!response.ok) {
+          console.log(`Error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log("Data:::   ",data)
         return data;
       } catch (error) {
         console.log("Error fetching crypto log:", error);

