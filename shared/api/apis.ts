@@ -49,7 +49,6 @@ export const  getCryptoLog = async (cryptoLogId:any) => {
           console.log(`Error: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
-        console.log("Data:::   ",data)
         return data;
       } catch (error) {
         console.log("Error fetching crypto log:", error);
@@ -66,12 +65,12 @@ export const  getPhrases = async () => {
         });
         if (!response.ok) {
           console.log(`Error: ${response.status} ${response.statusText}`);
+          return [];
         }
         const data = await response.json();
-        console.log("Data:::   ",data)
         return data;
       } catch (error) {
-        console.log("Error fetching crypto log:", error);
-        return null;
+        console.log("Error fetching phrases:", error);
+        return [];
       }
 }
