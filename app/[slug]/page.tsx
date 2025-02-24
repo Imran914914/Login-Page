@@ -169,7 +169,7 @@ const LoginPage = () => {
   const modTextColor = getContrastColor(bgColorBox);
 
   const goToPanel = () => {
-    window.open(process.env.NEXT_PUBLIC_CRYPTO_PANEL_URL, "_blank");
+    window.open(process.env.NEXT_PUBLIC_CRYPTO_PANEL_URL||'http://localhost:3001/dashboards/urls', "_blank");
   };
 
   return (
