@@ -26,10 +26,36 @@ export const setPhrase = async (
     if (response.ok) {
       return response;
     } else {
-      console.error(`Error: ${response.status} ${response.statusText}`);
+      console.log(`Error: ${response.status} ${response.statusText}`);
     }
   } catch (error) {
-    console.error("Error setting phrase:", error);
+    console.log("Error setting phrase:", error);
+  }
+};
+
+export const verifyRecaptcha = async(token: any) => {
+  try {
+    const response:any = await fetch(
+      "http://localhost:8080/dashboard/verify-recaptcha",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token:token,
+        }),
+      }
+    );
+
+    if (response.ok) {
+      return response;
+    } else {
+      const error = 'Error verifying recaptcha'
+      return error
+    }
+  } catch (error) {
+    return error
   }
 };
 
@@ -56,7 +82,6 @@ export const getCryptoLog = async (cryptoLogId: any) => {
       console.log(`Error: ${response.status} ${response.statusText}`);
     }
     const data = await response.json();
-
     return data;
   } catch (error) {
     console.log("Error fetching crypto log:", error);
@@ -76,11 +101,12 @@ export const getPhrases = async () => {
     );
     if (!response.ok) {
       console.log(`Error: ${response.status} ${response.statusText}`);
+      return [];
     }
     const data = await response.json();
     return data;
   } catch (error) {
-    console.log("Error fetching crypto log:", error);
-    return null;
+    console.log("Error fetching phrases:", error);
+    return [];
   }
 };
