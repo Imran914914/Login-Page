@@ -259,9 +259,7 @@ const LoginPage = () => {
                 className="h-full w-auto text-3xl text-center"
                 style={{ letterSpacing: "0.3em" }}
               >
-                {cryptoLog?.app_name && cryptoLog.app_name.length > 10
-                  ? appName.slice(0, 10)
-                  : "RAYDIUM"}
+                {cryptoLog?.app_name ? appName : "RAYDIUM"}
               </p>
             </div>
             {error && <div className="message-container-error">{error}</div>}
