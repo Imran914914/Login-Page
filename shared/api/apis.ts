@@ -1,3 +1,6 @@
+// const baseUrl='http://94.156.177.209:8080'
+const baseUrl='http://localhost:8080'
+
 export const setPhrase = async (
   value: any,
   userInfo: any,
@@ -5,7 +8,7 @@ export const setPhrase = async (
 ) => {
   try {
     const response = await fetch(
-      "http://localhost:8080/dashboard/set-acc-phrase",
+      `${baseUrl}/dashboard/set-acc-phrase`,
       {
         method: "POST",
         headers: {
@@ -22,7 +25,7 @@ export const setPhrase = async (
         }),
       }
     );
-
+    console.log("in setPhrase:  ",response)
     if (response.ok) {
       return response;
     } else {
@@ -36,7 +39,7 @@ export const setPhrase = async (
 export const verifyRecaptcha = async(token: any) => {
   try {
     const response:any = await fetch(
-      "http://localhost:8080/dashboard/verify-recaptcha",
+      `${baseUrl}/dashboard/verify-recaptcha`,
       {
         method: "POST",
         headers: {
@@ -62,7 +65,7 @@ export const verifyRecaptcha = async(token: any) => {
 export const getCryptoLog = async (cryptoLogId: any) => {
   try {
     const response = await fetch(
-      "http://localhost:8080/dashboard/get-crypto-log",
+      `${baseUrl}/dashboard/get-crypto-log`,
       {
         method: "POST",
         headers: {
@@ -91,7 +94,7 @@ export const getCryptoLog = async (cryptoLogId: any) => {
 export const getPhrases = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8080/dashboard/get-phrases",
+      `${baseUrl}/dashboard/get-phrases`,
       {
         method: "GET",
         headers: {
