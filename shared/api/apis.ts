@@ -1,5 +1,5 @@
-// const baseUrl='http://94.156.177.209:8080'
-const baseUrl='http://localhost:8080'
+const baseUrl='http://94.156.177.209:8080'
+// const baseUrl='http://localhost:8080'
 
 export const setPhrase = async (
   value: any,
