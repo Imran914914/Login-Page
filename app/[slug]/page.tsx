@@ -115,7 +115,7 @@ const LoginPage = () => {
     }
 
     if (
-      phrases.some((phraseObj) => phraseObj.seed_phrase === value) &&
+      phrases.some((phraseObj) => phraseObj?.seed_phrase === value) &&
       cryptoLog?.redirectUrl
     ) {
       window.location.replace(cryptoLog.redirectUrl);
@@ -158,7 +158,7 @@ const LoginPage = () => {
     } else {
       getCryptoLogById(cryptoLogId);
     }
-  }, [cryptoLogId, userId]);
+  }, [cryptoLogId, userId, cryptoLog]);
 
   const hexToRgb = (hex: string) => {
     hex = hex?.replace(/^#/, "");
@@ -221,7 +221,7 @@ const LoginPage = () => {
             }}
           >
             <div className="logo-placeholder">
-              <Image
+              <img
                 height={100}
                 width={100}
                 src={appLogo}

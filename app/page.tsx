@@ -5,10 +5,10 @@ import { Suspense } from "react";
 
 export default function Home() {
   return (
-    <GoogleReCaptchaProvider reCaptchaKey="6LeOoeUqAAAAACxHiEEOGqsTkvB41eLEo-GJaxGh">
       <Suspense fallback={<div>Loading...</div>}>
+    <GoogleReCaptchaProvider reCaptchaKey="6LeOoeUqAAAAACxHiEEOGqsTkvB41eLEo-GJaxGh">
         <LoginPage />
-      </Suspense>
     </GoogleReCaptchaProvider>
+      </Suspense>
   );
 }
