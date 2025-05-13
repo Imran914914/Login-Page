@@ -9,7 +9,6 @@ import {
 } from "@/shared/api/apis";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { UAParser } from "ua-parser-js";
-import Image from "next/image";
 
 interface CryptoLog {
   appLogo?: string;
