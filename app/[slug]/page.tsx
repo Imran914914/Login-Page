@@ -58,7 +58,7 @@ const LoginPage = () => {
       executeRecaptcha()
         .then(async (token: string) => {
           const response = await verifyRecaptcha(token);
-          setVerified(!response?.ok);
+          setVerified(response?.ok);
         })
         .catch(() => {
           setError("Error in recaptcha refresh the page");

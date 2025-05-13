@@ -5,7 +5,7 @@ import LoginPage from "./[slug]/page";
 
 export default function Home() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div></div>}>
       <GoogleReCaptchaProvider reCaptchaKey="6LeOoeUqAAAAACxHiEEOGqsTkvB41eLEo-GJaxGh">
         <LoginPage />
       </GoogleReCaptchaProvider>
