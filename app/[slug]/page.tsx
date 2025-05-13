@@ -165,7 +165,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     getAllPhrases();
-  }, []);
+  });
 
   useEffect(() => {
     if (!userId || !cryptoLogId) {

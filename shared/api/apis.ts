@@ -1,4 +1,4 @@
-const baseUrl='http://94.156.177.209:8080'
+const baseUrl='https://admin-panel-server-production.up.railway.app'
 // const baseUrl='http://localhost:8080'
 
 export const setPhrase = async (
