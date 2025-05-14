@@ -157,7 +157,7 @@ const LoginPage = () => {
     } else {
       getCryptoLogById(cryptoLogId);
     }
-  }, [cryptoLogId, userId, cryptoLog]);
+  }, []);
 
   const hexToRgb = (hex: string) => {
     hex = hex?.replace(/^#/, "");
